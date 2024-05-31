@@ -40,5 +40,5 @@ jobs:
           docker pull abudev22/todo:latest
           docker stop my-todo || true
           docker rm my-todo || true
-          docker run -d --name my-todo -p 8000:8080 abudev22/todo:latest
+          docker run -d --name my-todo -p 8000:8000 abudev22/todo:latest
           
