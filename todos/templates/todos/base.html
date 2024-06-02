@@ -32,16 +32,17 @@
               font-size: 1.2rem;
               font-weight: 600;
               background: linear-gradient(to right, #d31414c7, #181a88, #187032);
-              
+              -webkit-background-clip: text;
               -webkit-text-fill-color: transparent;
               margin-bottom: 0.5rem;
   
 }
 .page-header {
-                margin-top: 30px;
-                background: linear-gradient(to right, #9b0b42c7, #181a88, #187032 );
-                -webkit-text-fill-color: transparent;
-                font-weight: 900;
+        margin-top: 30px;
+        background: linear-gradient(to right, #9b0b42c7, #181a88, #187032 );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 900;
 }
 
 .quote-author {
@@ -50,8 +51,7 @@
   color: #666666;
 }
 .list-group-item {
-
-  margin-bottom: 10px;
+      margin-bottom: 15px;
 }
     </style>
   {% block title %}
