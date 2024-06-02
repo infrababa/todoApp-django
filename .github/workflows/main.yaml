@@ -22,8 +22,8 @@ jobs:
         password: ${{ secrets.DOCKER_HUB_PASSWORD }}
     - name: Build and push Docker image
       run: |
-        docker build -t abudev22/todo .
-        docker push abudev22/todo:latest
+        docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/todo .
+        docker push ${{ secrets.DOCKER_HUB_USERNAME }}/todo:latest
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
@@ -44,7 +44,7 @@ jobs:
         username: ${{ secrets.EC2_USERNAME }}
         key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
         script: |
-          docker pull abudev22/todo:latest
+          docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/todo:latest
           docker stop my-todo || true
           docker rm my-todo || true
           docker run -d --name my-todo -p 8000:8000 abudev22/todo:latest
