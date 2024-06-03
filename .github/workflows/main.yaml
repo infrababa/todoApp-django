@@ -43,6 +43,7 @@ jobs:
           --application-name todo-api \
           --deployment-group-name todo-deployment-group \
       # --s3-location bucket=my-deployment-bucket-arora,bundleType=tar,key=deployment_package.tar.gz
+      
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
