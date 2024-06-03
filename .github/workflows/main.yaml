@@ -27,7 +27,7 @@ jobs:
 
     - name: Create deployment package
       run: |
-        tar -czvf deploy/deployment_package.tar.gz -C deploy .
+        tar -czvf ./deploy/deployment_package.tar.gz -C deploy .
 
     - name: Upload to S3
       run: |
