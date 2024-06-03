@@ -25,24 +25,24 @@ jobs:
         docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/todo-api .
         docker push ${{ secrets.DOCKER_HUB_USERNAME }}/todo-api:latest
 
-    - name: Create deployment package
-      run: |
-        tar -czvf ./deploy/deployment_package.tar.gz -C deploy .
+    # - name: Create deployment package
+    #   run: |
+    #     tar -czvf ./deploy/deployment_package.tar.gz -C deploy .
 
-    - name: Upload to S3
-      run: |
-        aws s3 cp deploy/deployment_package.tar.gz s3://my-deployment-bucket-arora/deployment_package.tar.gz
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_REGION: us-east-2
+    # - name: Upload to S3
+    #   run: |
+    #     aws s3 cp deploy/deployment_package.tar.gz s3://my-deployment-bucket-arora/deployment_package.tar.gz
+        # env:
+        # AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        # AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        # AWS_REGION: us-east-2
 
     - name: Deploy to AWS CodeDeploy
       run: |
         aws deploy create-deployment \
           --application-name todo-api \
           --deployment-group-name todo-deployment-group \
-          --s3-location bucket=my-deployment-bucket-arora,bundleType=tar,key=deployment_package.tar.gz
+      # --s3-location bucket=my-deployment-bucket-arora,bundleType=tar,key=deployment_package.tar.gz
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
