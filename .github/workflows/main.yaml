@@ -1,4 +1,4 @@
-name: Deploy Todo API
+name: Deploy website to EC2 using AWS CodeDeploy
 
 on:
   push:
@@ -9,38 +9,28 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
-
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-      
-    - name: Login to Docker Hub
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKER_HUB_USERNAME }}
-        password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-    - name: Build and push Docker image
-      run: |
-        docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/todo .
-        docker push ${{ secrets.DOCKER_HUB_USERNAME }}/todo:latest
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
-    - name: Configure SSH
-      uses: webfactory/ssh-agent@v0.7.0
-      with:
-        ssh-private-key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+      - name: Build and push Docker image
+        run: |
+          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/devops-app .
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/devops-app:latest
 
-    - name: Deploy to EC2 instance
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.EC2_PUBLIC_IP }}
-        username: ${{ secrets.EC2_USERNAME }}
-        key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
-        script: |
-          docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/todo:latest
-          docker stop my-todo || true
-          docker rm my-todo || true
-          docker run -d --name my-todo -p 8000:8000 ${{ secrets.DOCKER_HUB_USERNAME }}/todo:latest
-          
+      - name: Deploy to AWS CodeDeploy
+        run: |
+          aws deploy create-deployment \
+            --application-name devops-app \
+            --deployment-group-name devops-app-deployment-group \
+            --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: us-east-2
