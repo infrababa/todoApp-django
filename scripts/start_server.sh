@@ -1,5 +1,5 @@
 #!/bin/bash
-docker run -d --name my-website -p 8000:8000 abudev22/mya-pp:latest
+docker run -d --name my-website -p 8000:8000 abudev22/my-app:latest
 
 
 
