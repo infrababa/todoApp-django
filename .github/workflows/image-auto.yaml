@@ -13,7 +13,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
-        fetch-depth:   1 # Fetch all history for all tags and branches
+        fetch-depth: 0  # Fetch all history for all tags and branches
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
@@ -27,23 +27,28 @@ jobs:
     - name: Generate semantic version
       id: semver
       run: |
-        # Get the latest tag
+        echo "Fetching tags..."
+        git fetch --tags
+        
+        echo "Current git tags:"
+        git tag -l
+        
         latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+        echo "Latest tag: $latest_tag"
         
-        # Remove the 'v' prefix if present
         latest_version=${latest_tag#v}
+        echo "Latest version (without v): $latest_version"
         
-        # Split the version into major, minor, and patch
         IFS='.' read -r major minor patch <<< "$latest_version"
+        echo "Parsed version: major=$major, minor=$minor, patch=$patch"
         
-        # Increment the patch version
         patch=$((patch + 1))
+        echo "Incremented patch: $patch"
         
-        # Create the new version
         new_version="$major.$minor.$patch"
+        echo "New version: $new_version"
         
         echo "VERSION=$new_version" >> $GITHUB_OUTPUT
-        echo "New version: $new_version"
 
     - name: Build and push Docker image
       uses: docker/build-push-action@v4
@@ -51,10 +56,5 @@ jobs:
         context: .
         push: true
         tags: |
-          ${{ secrets.DOCKER_HUB_USERNAME }}/todoapp:latest
           ${{ secrets.DOCKER_HUB_USERNAME }}/todoapp:${{ steps.semver.outputs.VERSION }}
-
-
-          
-
-
+          ${{ secrets.DOCKER_HUB_USERNAME }}/todoapp:${{ steps.semver.outputs.VERSION }}
