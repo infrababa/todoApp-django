@@ -24,31 +24,36 @@ jobs:
         username: ${{ secrets.DOCKER_HUB_USERNAME }}
         password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-    - name: Generate semantic version
-      id: semver
-      run: |
-        echo "Fetching tags..."
-        git fetch --tags
-        
-        echo "Current git tags:"
-        git tag -l
-        
-        latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-        echo "Latest tag: $latest_tag"
-        
-        latest_version=${latest_tag#v}
-        echo "Latest version (without v): $latest_version"
-        
-        IFS='.' read -r major minor patch <<< "$latest_version"
-        echo "Parsed version: major=$major, minor=$minor, patch=$patch"
-        
-        patch=$((patch + 1))
-        echo "Incremented patch: $patch"
-        
-        new_version="$major.$minor.$patch"
-        echo "New version: $new_version"
-        
-        echo "VERSION=$new_version" >> $GITHUB_OUTPUT
+- name: Generate semantic version
+  id: semver
+  run: |
+    echo "Fetching tags..."
+    git fetch --tags
+    
+    echo "Current git tags:"
+    git tag -l
+    
+    latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+    echo "Latest tag: $latest_tag"
+    
+    latest_version=${latest_tag#v}
+    echo "Latest version (without v): $latest_version"
+    
+    IFS='.' read -r major minor patch <<< "$latest_version"
+    echo "Parsed version: major=$major, minor=$minor, patch=$patch"
+    
+    # Get the number of commits since the last tag
+    commits_since_tag=$(git rev-list $latest_tag..HEAD --count)
+    echo "Commits since last tag: $commits_since_tag"
+    
+    # Increment patch by the number of commits
+    new_patch=$((patch + commits_since_tag))
+    echo "New patch: $new_patch"
+    
+    new_version="$major.$minor.$new_patch"
+    echo "New version: $new_version"
+    
+    echo "VERSION=$new_version" >> $GITHUB_OUTPUT
 
     - name: Build and push Docker image
       uses: docker/build-push-action@v4
@@ -56,7 +61,6 @@ jobs:
         context: .
         push: true
         tags: |
-          ${{ secrets.DOCKER_HUB_USERNAME }}/todoapp:${{ steps.semver.outputs.VERSION }}
+          ${{ secrets.DOCKER_HUB_USERNAME }}/todoapp:latest
           ${{ secrets.DOCKER_HUB_USERNAME }}/todoapp:${{ steps.semver.outputs.VERSION }}
 
-          
