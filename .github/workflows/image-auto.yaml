@@ -58,3 +58,5 @@ jobs:
         tags: |
           ${{ secrets.DOCKER_HUB_USERNAME }}/todoapp:${{ steps.semver.outputs.VERSION }}
           ${{ secrets.DOCKER_HUB_USERNAME }}/todoapp:${{ steps.semver.outputs.VERSION }}
+
+          
