@@ -24,7 +24,7 @@ jobs:
         username: ${{ secrets.DOCKER_HUB_USERNAME }}
         password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-   - name: Generate semantic version
+    - name: Generate semantic version
       id: semver
       run: |
         echo "Fetching tags..."
@@ -42,8 +42,12 @@ jobs:
         IFS='.' read -r major minor patch <<< "$latest_version"
         echo "Parsed version: major=$major, minor=$minor, patch=$patch"
         
-        # Use GitHub run number to increment the patch version
-        new_patch=$((patch + GITHUB_RUN_NUMBER - 1))
+        # Get the number of commits since the last tag
+        commits_since_tag=$(git rev-list $latest_tag..HEAD --count)
+        echo "Commits since last tag: $commits_since_tag"
+        
+        # Increment patch by the number of commits
+        new_patch=$((patch + commits_since_tag))
         echo "New patch: $new_patch"
         
         new_version="$major.$minor.$new_patch"
