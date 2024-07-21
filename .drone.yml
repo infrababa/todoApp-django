@@ -1,0 +1,31 @@
+kind: pipeline
+type: docker
+name: default
+
+steps:
+  - name: build
+    image: python:3.9
+    commands:
+      - pip install -r requirements.txt
+      # - pytest  # Assuming you have tests set up
+      - docker build -t ${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}:${DRONE_COMMIT_SHA} .
+      - docker tag ${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}:${DRONE_COMMIT_SHA} ${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}:latest
+
+  - name: publish
+    image: plugins/docker
+    settings:
+      repo: ${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}
+      tags:
+        - latest
+        - ${DRONE_COMMIT_SHA}
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_token
+
+trigger:
+  event:
+    - push
+  branch:
+    - main
+    - master
