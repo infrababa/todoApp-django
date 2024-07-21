@@ -51,18 +51,18 @@ steps:
         - main
 
   - name: notify-discord
-      image: appleboy/drone-discord
-      settings:
-        webhook_id:
-          from_secret: discord_webhook_url
-        message: >
-          {{#success build.status}}
-            Build {{build.number}} succeeded. Docker image pushed to DockerHub.
-          {{else}}
-            Build {{build.number}} failed.
-          {{/success}}
-      when:
-        status: [success, failure]
+    image: appleboy/drone-discord
+    settings:
+      webhook_id:
+        from_secret: discord_webhook_url
+      message: >
+        {{#success build.status}}
+          Build {{build.number}} succeeded. Docker image pushed to DockerHub.
+        {{else}}
+          Build {{build.number}} failed.
+        {{/success}}
+    when:
+      status: [success, failure]
 
 
-        
+
