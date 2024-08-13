@@ -1,0 +1,65 @@
+# kind: pipeline
+# type: docker
+# name: default
+
+# steps:
+#   - name: build
+#     image: python:3.9
+#     commands:
+#       - pip install -r requirements.txt
+#       # - pytest  # Assuming you have tests set up
+#       - docker build -t ${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}:${DRONE_COMMIT_SHA} .
+#       - docker tag ${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}:${DRONE_COMMIT_SHA} ${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}:latest
+
+#   - name: publish
+#     image: plugins/docker
+#     settings:
+#       repo: ${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}
+#       tags:
+#         - latest
+#         - ${DRONE_COMMIT_SHA}
+#       username:
+#         from_secret: docker_username
+#       password:
+#         from_secret: docker_token
+
+# trigger:
+#   event:
+#     - push
+#   branch:
+#     - main
+#     - master
+
+kind: pipeline
+type: docker
+name: default
+
+steps:
+  - name: build-and-push
+    image: plugins/docker
+    settings:
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_token
+      repo: abudev22/djangoapp
+      tags:
+        - latest
+        - ${DRONE_COMMIT_SHA:0:8}
+    when:
+      branch:
+        - main
+
+
+
+  - name: msg status
+    image: appleboy/drone-discord
+    settings:
+      webhook_id:
+        from_secret: discord_id
+      webhook_token:
+        from_secret: discord_token
+      message: "{{#success build.status}}✅{{else}}❌{{/success}}  Repository `[{{repo.name}}/{{commit.branch}}]` triggered by event `[{{uppercase build.event}}]` for build.\n    - Commit [[{{commit.sha}}]({{commit.link}})]\n    - Author `[{{commit.author}} / {{commit.email}}]`\n    - Message: {{commit.message}}    - Drone build [[#{{build.number}}]({{build.link}})] reported `[{{uppercase build.status}}]` at `[{{datetime build.finished \"2006.01.02 15:04\" \"\"}}]`\n"
+      when:
+        status: [ success, failure, changed ]
+
